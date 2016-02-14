@@ -15,6 +15,16 @@
                ,  instances      = []
 }).
 
+update(S, I) -> update(S, I, 0).
+update(Service, Instances, Uses) ->
+  Service#service{instances = Instances,
+          date = Service#service.date#date{
+                                   modified=elsa_date:get()
+                                  },
+          use_count = Service#service.use_count+Uses
+  }.
+
+
 -record(instance, {id          :: binary()
                  , service_id  :: binary()
                  , location    :: binary()
@@ -24,6 +34,13 @@
                  }
 
 }).
+
+update(I, T) -> update(I, T, 0).
+update(Instance, Threads, Uses) ->
+  Instance#instance{threads = Threads
+                  , date    = elsa_date:update(Instance#instance.date)
+                  , use_count = Instance#instance.use_count+Uses
+  }.
 
 -record(thread, {id          :: binary()
                , instance_id :: binary()
