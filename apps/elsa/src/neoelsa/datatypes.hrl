@@ -42,12 +42,6 @@ update(Instance, Threads, Uses) ->
                   , use_count = Instance#instance.use_count+Uses
   }.
 
--record(thread, {id          :: binary()
-               , instance_id :: binary()
-               , task_id     :: bianry()
-               , date         = #date{}
-               , use_count    = 0
-}).
 
 -record(result, {location       :: binary()
                , body_byte_size :: integer()
