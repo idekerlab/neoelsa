@@ -2,20 +2,33 @@
 -module(elsa_service).
 
 -export([new/2
+       , add_instance/3
+       , remove_instance/2
        , thread_count/1
        , get_thread/1
        , put_thread/3]).
 
 -include("elsa_service.hrl").
 
-new(Name, Version) ->
-  ID = elsa_id:get(Name, Version),
+new(Name, Version) -> new(Name, Version, []).
+new(Name, Version, Instances) ->
+  ID = elsa_hash:sha(Name, Version),
   #service{id        = ID
          , name      = Name
          , version   = Version
          , date      = elsa_date:new()
-         , instances = []
+         , instances = Instances
           }.
+
+add_instance(S = #service{id=ID, instances=Is, date=Date}, Location, ThreadCount) ->
+  S#service{instances = [elsa_instance:new(ID, Location, ThreadCount)|Is]
+          , date      = elsa_date:update(Date)
+           }.
+
+remove_instance(S = #service{instances=Is, date=Date}, InstanceID) ->
+S#service{instances = lists:keydelete(InstanceID, 2, Is)
+        , date      = elsa_date:update(Date)
+         }.
 
 thread_count(#service{instances=Is}) ->
   lists:foldl(fun(I, Sum) -> elsa_instance:thread_count(I) + Sum end, 0, Is).
