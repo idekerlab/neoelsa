@@ -1,5 +1,5 @@
 
--include("../date/date.hrl").
+-include("../date/elsa_date.hrl").
 
 -record(thread, {id          :: binary()
                , instance_id :: binary()

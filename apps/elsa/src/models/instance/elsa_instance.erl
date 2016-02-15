@@ -1,19 +1,18 @@
 
 -module(elsa_instance).
 
--export([new/2,
+-export([new/3,
          rank/2,
          thread_count/1,
-         thread_out/1,
          get_thread/1,
          put_thread/2]).
 
--include("elsa_thread.hrl").
+-include("elsa_instance.hrl").
 
-new(Location, ThreadCount) ->
+new(ServiceID, Location, ThreadCount) ->
   ID = elsa_id:get(Location),
-  Threads = [ elsa_thread:new(ID, Num) || Num <- lists:seq(1, Num) ],
-  ThreadRefs = [ T#thread.id || T <- Threads ],
+  Threads = [ elsa_thread:new(ID, Num) || Num <- lists:seq(1, ThreadCount) ],
+  ThreadRefs = [ elsa_thread:get_id(T) || T <- Threads ],
   #instance{id                      = ID
           , service_id              = ServiceID
           , location                = Location
@@ -44,7 +43,7 @@ get_thread(I = #instance{id=ID, thread_refs=ThreadRefs, threads=Threads, date=Da
   end.
 
 put_thread(Instance = #instance{thread_refs=ThreadRefs, threads=Threads, date=Date}, ThreadRef) ->
-  Instance#instance{thread_refs = [ThreadRef|ThreadRefs],
+  Instance#instance{thread_refs = [ThreadRef|ThreadRefs]
                   , threads     = deactivate_thread(Threads, ThreadRef)
                   , date        = elsa_date:update(Date)
                    }.

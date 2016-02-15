@@ -33,6 +33,6 @@ put_thread(S = #service{instances=Is, date=Date}, InstanceRef, ThreadRef) ->
   % Get the instance
   I = lists:keysearch(InstanceRef, 2, Is),
   Is2 = lists:keyreplace(InstanceRef, 2, Is, elsa_instance:put_thread(I, ThreadRef)),
-  S#service={instances = Is
-           , date      = elsa_date:update(Date)
-            }.
+  S#service{instances = Is2
+          , date      = elsa_date:update(Date)
+           }.

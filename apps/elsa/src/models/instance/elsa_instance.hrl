@@ -1,4 +1,6 @@
 
+-include("../date/elsa_date.hrl").
+
 -record(instance, {id                     :: binary()
                  , service_id             :: binary()
                  , location               :: binary()
