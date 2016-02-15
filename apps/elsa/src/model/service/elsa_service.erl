@@ -4,6 +4,7 @@
 -export([new/2
        , new/4
        , new/3
+       , has_name/2
        , find_instance/2
        , add_instance/3
        , remove_instance/2
@@ -26,6 +27,10 @@ new(Name, Version, Instances) ->
          , date      = elsa_date:new()
          , instances = Instances
           }.
+
+has_name(#service{name=N}, Name) ->
+  N == Name.
+
 
 find_instance(#service{instances=Is}, InstanceID) ->
   case [ I || I <- Is, elsa_instance:id(I) == InstanceID] of

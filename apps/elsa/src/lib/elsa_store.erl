@@ -33,9 +33,9 @@ put(Table, Item) ->
 
 set(Table, ItemID, UpdateItem) ->
   {atomic, ItemOrNotFound} = mnesia:transaction(fun() ->
-    case UpdateItem(mnesia:read(Table, ItemID, read)) of
+    case mnesia:read(Table, ItemID, read) of
       [] -> not_found;
-      [Item] -> mnesia:write(Table, Item, write)
+      [Item] -> mnesia:write(Table, UpdateItem(Item), write)
     end
   end), ItemOrNotFound.
 
