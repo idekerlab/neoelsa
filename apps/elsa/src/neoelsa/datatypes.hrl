@@ -25,23 +25,6 @@ update(Service, Instances, Uses) ->
   }.
 
 
--record(instance, {id          :: binary()
-                 , service_id  :: binary()
-                 , location    :: binary()
-                 , date         = #date{}
-                 , use_count    = 0
-                 , threads      = []
-                 }
-
-}).
-
-update(I, T) -> update(I, T, 0).
-update(Instance, Threads, Uses) ->
-  Instance#instance{threads = Threads
-                  , date    = elsa_date:update(Instance#instance.date)
-                  , use_count = Instance#instance.use_count+Uses
-  }.
-
 
 -record(result, {location       :: binary()
                , body_byte_size :: integer()
