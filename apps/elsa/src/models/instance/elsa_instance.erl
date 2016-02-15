@@ -2,7 +2,7 @@
 -module(elsa_instance).
 
 -export([new/2,
-         compare/2,
+         rank/2,
          thread_count/1,
          thread_out/1,
          get_thread/1,
@@ -22,7 +22,7 @@ new(Location, ThreadCount) ->
           , threads                 = Threads
            }.
 
-compare(I1, I2) ->
+rank(I1, I2) ->
   threads_out(I1) > threads_out(I2).
 
 thread_count(#instance{thread_refs=ThreadRefs}) ->
@@ -31,7 +31,7 @@ thread_count(#instance{thread_refs=ThreadRefs}) ->
 threads_out(I = #instance{threads=Threads}) ->
   length(Threads) - thread_count(I).
 
-get_thread(I = #instance{thread_refs=ThreadRefs, threads=Threads, date=Date, use_count=UC}) ->
+get_thread(I = #instance{id=ID, thread_refs=ThreadRefs, threads=Threads, date=Date, use_count=UC}) ->
   case ThreadRefs of
     [] -> none_available;
     [Ref|Refs] -> {I#instance{thread_refs = Refs
@@ -39,7 +39,8 @@ get_thread(I = #instance{thread_refs=ThreadRefs, threads=Threads, date=Date, use
                             , date        = elsa_date:update(Date)
                             , use_count   = UC+1
                              }
-                 , Ref}
+                 , {ID, Ref}
+                  }
   end.
 
 put_thread(Instance = #instance{thread_refs=ThreadRefs, threads=Threads, date=Date}, ThreadRef) ->
@@ -50,11 +51,11 @@ put_thread(Instance = #instance{thread_refs=ThreadRefs, threads=Threads, date=Da
 
 activate_thread(Threads, ThreadRef) ->
   T = lists:keysearch(ThreadRef, 2, Threads),
-  lists:keyreplace(ThreadRef, 2, Threads, elsa_thread:activate(T).
+  lists:keyreplace(ThreadRef, 2, Threads, elsa_thread:activate(T)).
 
 deactivate_thread(Threads, ThreadRef) ->
   T = lists:keysearch(ThreadRef, 2, Threads),
-  lists:keyreplace(ThreadRef, 2, Threads, elsa_thread:deactivate(T).
+  lists:keyreplace(ThreadRef, 2, Threads, elsa_thread:deactivate(T)).
 
 
 

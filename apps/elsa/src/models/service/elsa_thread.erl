@@ -1,16 +1,12 @@
 
--record(service, {id       :: binary()
-               ,  name     :: binary()
-               ,  version  :: binary()
-               ,  date      = #date{}
-               ,  use_count = 0
-               ,  instances = []
-}).
-
 -module(elsa_instance).
 
--export([new/2]).
+-export([new/2
+       , thread_count/1
+       , get_thread/1
+       , put_thread/3]).
 
+-include("elsa_service.hrl").
 
 new(Name, Version) ->
   ID = elsa_id:get(Name, Version),
@@ -24,17 +20,19 @@ new(Name, Version) ->
 thread_count(#service{instances=Is}) ->
   lists:foldl(fun(I, Sum) -> elsa_instance:thread_count(I) + Sum end, 0, Is).
 
-get_thread(S = #service{instances=Is}) -> 
+get_thread(S = #service{instances=Is, date=Date, use_count=UC}) ->
   Instances = [ I || I <- Is, elsa_instance:thread_count(I) > 0 ],
-  [Primary|Rest] = lists:sort(fun elsa_instance:compare/2, Instances),
-  {Primary2, Thread} = elsa_instance:thread_out(Primary),
-  {S#service{instances=[Primary2|Rest]}, Thread}.
+  [Primary|Rest] = lists:sort(fun elsa_instance:rank/2, Instances),
+  {Primary2, Refs} = elsa_instance:thread_out(Primary),
+  {S#service{instances = [Primary2|Rest]
+           , date      = elsa_date:update(Date)
+           , use_count = UC+1
+            }, Refs}.
 
-put_thread(T = #thread{instance_id=I_ID}) ->
-
-
-
-
-
-
-
+put_thread(S = #service{instances=Is, date=Date}, InstanceRef, ThreadRef) ->
+  % Get the instance
+  I = lists:keysearch(InstanceRef, 2, Is),
+  Is2 = lists:keyreplace(InstanceRef, 2, Is, elsa_instance:put_thread(I, ThreadRef)),
+  S#service={instances = Is
+           , date      = elsa_date:update(Date)
+            }.
