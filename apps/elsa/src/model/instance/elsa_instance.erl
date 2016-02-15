@@ -10,9 +10,9 @@
 -include("elsa_instance.hrl").
 
 new(ServiceID, Location, ThreadCount) ->
-  ID = elsa_id:get(Location),
+  ID = elsa_hash:sha(Location),
   Threads = [ elsa_thread:new(ID, Num) || Num <- lists:seq(1, ThreadCount) ],
-  ThreadRefs = [ elsa_thread:get_id(T) || T <- Threads ],
+  ThreadRefs = [ elsa_thread:ref(T) || T <- Threads ],
   #instance{id                      = ID
           , service_id              = ServiceID
           , location                = Location
@@ -49,11 +49,11 @@ put_thread(Instance = #instance{thread_refs=ThreadRefs, threads=Threads, date=Da
                    }.
 
 activate_thread(Threads, ThreadRef) ->
-  T = lists:keysearch(ThreadRef, 2, Threads),
+  {value, T} = lists:keysearch(ThreadRef, 2, Threads),
   lists:keyreplace(ThreadRef, 2, Threads, elsa_thread:activate(T)).
 
 deactivate_thread(Threads, ThreadRef) ->
-  T = lists:keysearch(ThreadRef, 2, Threads),
+  {value, T} = lists:keysearch(ThreadRef, 2, Threads),
   lists:keyreplace(ThreadRef, 2, Threads, elsa_thread:deactivate(T)).
 
 
