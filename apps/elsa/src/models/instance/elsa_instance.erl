@@ -2,7 +2,9 @@
 -module(elsa_instance).
 
 -export([new/2,
+         compare/2,
          thread_count/1,
+         thread_out/1,
          get_thread/1,
          put_thread/2]).
 
@@ -20,8 +22,14 @@ new(Location, ThreadCount) ->
           , threads                 = Threads
            }.
 
-thread_count(I = #instance{thread_refs=ThreadRefs}) ->
+compare(I1, I2) ->
+  threads_out(I1) > threads_out(I2).
+
+thread_count(#instance{thread_refs=ThreadRefs}) ->
   length(ThreadRefs).
+
+threads_out(I = #instance{threads=Threads}) ->
+  length(Threads) - thread_count(I).
 
 get_thread(I = #instance{thread_refs=ThreadRefs, threads=Threads, date=Date, use_count=UC}) ->
   case ThreadRefs of
