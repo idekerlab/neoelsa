@@ -1,5 +1,5 @@
 
--module(elsa_instance).
+-module(elsa_service).
 
 -export([new/2
        , thread_count/1
@@ -23,7 +23,7 @@ thread_count(#service{instances=Is}) ->
 get_thread(S = #service{instances=Is, date=Date, use_count=UC}) ->
   Instances = [ I || I <- Is, elsa_instance:thread_count(I) > 0 ],
   [Primary|Rest] = lists:sort(fun elsa_instance:rank/2, Instances),
-  {Primary2, Refs} = elsa_instance:thread_out(Primary),
+  {Primary2, Refs} = elsa_instance:get_thread(Primary),
   {S#service{instances = [Primary2|Rest]
            , date      = elsa_date:update(Date)
            , use_count = UC+1
