@@ -2,15 +2,22 @@
 -module(elsa_service).
 
 -export([new/2
+       , new/4
+       , new/3
+       , find_instance/2
        , add_instance/3
        , remove_instance/2
        , thread_count/1
        , get_thread/1
-       , put_thread/3]).
+       , put_thread/3
+       , service_format/1
+       , version_format/1]).
 
 -include("elsa_service.hrl").
 
 new(Name, Version) -> new(Name, Version, []).
+new(Name, Version, Location, ThreadCount) ->
+  new(Name, Version, [elsa_instance:new(elsa_hash:sha(Name, Version), Location, ThreadCount)]).
 new(Name, Version, Instances) ->
   ID = elsa_hash:sha(Name, Version),
   #service{id        = ID
@@ -19,6 +26,12 @@ new(Name, Version, Instances) ->
          , date      = elsa_date:new()
          , instances = Instances
           }.
+
+find_instance(#service{instances=Is}, InstanceID) ->
+  case [ I || I <- Is, elsa_instance:id(I) == InstanceID] of
+    [] -> not_found;
+    Instance -> Instance
+  end.
 
 add_instance(S = #service{id=ID, instances=Is, date=Date}, Location, ThreadCount) ->
   S#service{instances = [elsa_instance:new(ID, Location, ThreadCount)|Is]
@@ -49,3 +62,20 @@ put_thread(S = #service{instances=Is, date=Date}, InstanceRef, ThreadRef) ->
   S#service{instances = Is2
           , date      = elsa_date:update(Date)
            }.
+
+service_format(S = #service{id=ID, name=Name, version=Version, date=Date, instances=Instances}) ->
+  [
+   {<<"id">>, ID}
+ , {<<"name">>, Name}
+ , {<<"version">>, Version}
+ , {<<"date">>, elsa_date:format(Date)}
+ , {<<"instance_count">>, length(Instances)}
+ , {<<"total_threads">>, thread_count(S)}
+  ].
+
+version_format(#service{id=ID, version=Version, date=Date}) ->
+  [
+   {<<"service_id">>, ID}
+ , {<<"version">>, Version}
+ , {<<"date">>, elsa_date:format(Date)}
+  ].

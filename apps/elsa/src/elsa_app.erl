@@ -1,32 +1,17 @@
-%%%-------------------------------------------------------------------
-%% @doc elsa public API
-%% @end
-%%%-------------------------------------------------------------------
 
 -module(elsa_app).
-
 -behaviour(application).
 
-%% Application callbacks
 -export([start/2
         ,stop/1]).
-
-%%====================================================================
-%% API
-%%====================================================================
 
 start(_StartType, _StartArgs) ->
     database_setup([node()]),
     {ok, self()}.
 
-%%--------------------------------------------------------------------
 stop(_State) ->
   database_teardown([node()]),
-    ok.
-
-%%====================================================================
-%% Internal functions
-%%====================================================================
+  ok.
 
 database_setup(Nodes) ->
   mnesia:stop(),
@@ -36,8 +21,10 @@ database_setup(Nodes) ->
   end,
   mnesia:start(),
   rpc:multicall(Nodes, application, start, [mnesia]),
-  lager:info("Mnesia started.").
+  lager:info("Mnesia started."),
+  elsa_store:load_table(elsa_services, service, [id, name, version, date, use_count, instances]).
 
 database_teardown(Nodes) ->
+  elsa_store:clear_table(elsa_services),
   rpc:multicall(Nodes, application, stop, [mnesia]),
   lager:info("Mnesia stopped.").

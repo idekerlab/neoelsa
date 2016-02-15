@@ -2,6 +2,7 @@
 -module(elsa_instance).
 
 -export([new/3,
+         id/1,
          rank/2,
          thread_count/1,
          get_thread/1,
@@ -20,6 +21,8 @@ new(ServiceID, Location, ThreadCount) ->
           , thread_refs             = ThreadRefs
           , threads                 = Threads
            }.
+
+id(#instance{id=ID}) -> ID.
 
 rank(I1, I2) ->
   threads_out(I1) > threads_out(I2).
