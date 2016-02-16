@@ -39,14 +39,15 @@ find_instance(#service{instances=Is}, InstanceID) ->
   end.
 
 add_instance(S = #service{id=ID, instances=Is, date=Date}, Location, ThreadCount) ->
-  S#service{instances = [elsa_instance:new(ID, Location, ThreadCount)|Is]
+  Instance = elsa_instance:new(ID, Location, ThreadCount),
+  S#service{instances = [Instance|Is]
           , date      = elsa_date:update(Date)
            }.
 
 remove_instance(S = #service{instances=Is, date=Date}, InstanceID) ->
-S#service{instances = lists:keydelete(InstanceID, 2, Is)
-        , date      = elsa_date:update(Date)
-         }.
+  S#service{instances = lists:keydelete(InstanceID, 2, Is)
+          , date      = elsa_date:update(Date)
+           }.
 
 thread_count(#service{instances=Is}) ->
   lists:foldl(fun(I, Sum) -> elsa_instance:thread_count(I) + Sum end, 0, Is).

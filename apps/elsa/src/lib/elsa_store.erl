@@ -24,12 +24,10 @@ clear_table(Table) ->
     {aborted, _} -> lager:info("~p table could not be cleared.", [Table])
   end.
 
-
 put(Table, Item) ->
   {atomic, ok} = mnesia:transaction(fun() ->
       mnesia:write(Table, Item, write)
   end), Item.
-
 
 set(Table, ItemID, UpdateItem) ->
   {atomic, ItemOrNotFound} = mnesia:transaction(fun() ->
