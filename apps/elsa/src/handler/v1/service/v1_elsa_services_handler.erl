@@ -31,6 +31,6 @@ json_request(Req, _State) ->
 content_types_provided(Req, _State) ->
   {[{<<"application/json">>, json_response}], Req, _State}.
 
-json_response(Req, service) ->
-  Services = elsa_service_controller:format( elsa_service_controller:all()),
-  {elsa_body:to_json(Services), Req, service}.
+json_response(Req, _State) ->
+  Services = elsa_service_controller:format(elsa_service_controller:all()),
+  {elsa_body:to_json(Services), Req, _State}.

@@ -42,7 +42,7 @@ ignore({_Status, Response}) -> Response.
 
 format(Services) ->
   [
-   {"services", [elsa_service:format(S) || S <- Services]}
+   {<<"services">>, [elsa_service:format(S) || S <- Services]}
   ].
 
 version_format(ServiceName, Versions) ->

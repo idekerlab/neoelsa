@@ -22,5 +22,10 @@ update(Date) ->
 utc() ->
     calendar:universal_time().
 
+format(#date{created=Created, modified=Modified}) ->
+  [
+   {<<"created_on">>, format(Created)},
+   {<<"last_modified">>, format(Modified)}
+  ];
 format({{Y,MO,D}, {H,MI,S}}) ->
     list_to_binary(io_lib:format("~p/~p/~p ~p:~p:~p", [Y, MO, D, H, MI, S])).
