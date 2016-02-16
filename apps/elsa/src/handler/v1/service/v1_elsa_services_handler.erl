@@ -24,6 +24,7 @@ content_types_accepted(Req, _State) ->
 
 json_request(Req, _State) ->
   {Request, Body} = elsa_body:read(Req),
+  lager:error("Body was ~p", [Body]),
   {Status, Response} = elsa_service_controller:register_body(Body),
   {Status, elsa_body:write(Request, Response), _State}.
 

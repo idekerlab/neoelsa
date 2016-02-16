@@ -7,6 +7,7 @@
 
 start(_StartType, _StartArgs) ->
     database_setup([node()]),
+    elsa_router:start(),
     {ok, self()}.
 
 stop(_State) ->

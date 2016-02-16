@@ -28,28 +28,11 @@ unregister(Name, Version, Location) ->
   end).
 
 register_instance(N, V, I) ->
-  Fields = {extract(<<"location">>, I, missing), extract(<<"threads">>, I, 32)},
+  Fields = {elsa_body:key(<<"location">>, I, missing), elsa_body:key(<<"threads">>, I, 32)},
   {Location, ThreadCount} = Fields,
-  elsa_service_controller:register_instance(N, V, Location, ThreadCount),
-  validate(Fields, [
+  register(N, V, Location, ThreadCount),
+  elsa_body:validate(Fields, [
    {<<"id">>, elsa_hash:sha(Location)},
    {<<"location">>, Location},
    {<<"capacity">>, ThreadCount}
   ]).
-
-validate(Tuple, Response) ->
-  case lists:member(missing, tuple_to_list(Tuple)) of
-    false -> {true, [{<<"registered">>, true}, {<<"object">>, Response}]};
-    true -> {false, [{<<"registered">>, false}, {<<"object">>, Response}]}
-  end.
-
-extract(Key, Props, Default) ->
-  case Default of
-    missing -> proplists:get_value(Key, Props, missing);
-    Value -> Value
-  end.
-
-
-remove_status({Status, 
-
-

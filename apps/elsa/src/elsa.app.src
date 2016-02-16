@@ -5,7 +5,10 @@
   {mod, { elsa_app, []}},
   {applications,
    [kernel,
-    stdlib
+    stdlib,
+    cowboy,
+    hackney,
+    mnesia
    ]},
   {env,[]},
   {modules, []},
