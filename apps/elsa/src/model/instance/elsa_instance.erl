@@ -2,7 +2,9 @@
 -module(elsa_instance).
 
 -export([new/3,
+         format/1,
          id/1,
+         match/2,
          rank/2,
          thread_count/1,
          get_thread/1,
@@ -22,7 +24,22 @@ new(ServiceID, Location, ThreadCount) ->
           , threads                 = Threads
            }.
 
+format(#instance{id=ID, service_id=SID, location=Location, date=Date, thread_refs=Refs, threads=Threads,  use_count=UC}) ->
+  [
+   {<<"id">>, ID}
+ , {<<"service_id">>, SID}
+ , {<<"location">>, Location}
+ , {<<"date">>, elsa_date:format(Date)}
+ , {<<"use_count">>, UC}
+ , {<<"threads">>, [
+                    {<<"available">>, Refs}
+                  , {<<"all">>, [ elsa_thread:ref(T) || T <- Threads ]}
+                   ]}
+  ].
+
 id(#instance{id=ID}) -> ID.
+
+match(#instance{id=ID}, InstanceID) -> ID == InstanceID.
 
 rank(I1, I2) ->
   threads_out(I1) > threads_out(I2).

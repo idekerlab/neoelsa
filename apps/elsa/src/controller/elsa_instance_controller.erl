@@ -1,11 +1,24 @@
 
 -module(elsa_instance_controller).
 
--export([register/4
+-export([get/2
+       , all/1
+       , register/4
        , unregister/3
-       , register_instance/3]).
+       , register_instance/3
+       , format/1
+       , format/3]).
 
 -define(TABLE, elsa_services).
+
+get(Service, InstanceID) ->
+  exists([ I || I <- elsa_service:instances(Service), elsa_instance:match(I, InstanceID) ]).
+
+all(Service) ->
+  exists(elsa_service:instances(Service)).
+
+exists([]) -> {false, []};
+exists(Items) -> {true, Items}.
 
 register(N, V, _L, _T) when is_atom(N); is_atom(V) -> missing;
 register(Name, Version, Location, ThreadCount) ->
@@ -38,3 +51,14 @@ register_instance(N, V, I) ->
    {<<"location">>, Location},
    {<<"threads">>, ThreadCount}
   ]).
+
+format(Instance) ->
+  elsa_instance:format(Instance).
+
+format(Name, Version, Instances) ->
+  [
+   {<<"name">>, Name},
+   {<<"version">>, Version},
+   {<<"instances">>, [elsa_instance:format(I) || I <- Instances]}
+  ].
+

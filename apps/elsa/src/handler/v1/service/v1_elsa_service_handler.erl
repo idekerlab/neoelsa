@@ -33,12 +33,9 @@ content_types_provided(Req, _State) ->
   {[{<<"application/json">>, json_response}], Req, _State}.
 
 resource_exists(Req, ServiceName) ->
-  {Exists, Versions} = case elsa_service_controller:versions(ServiceName) of
-    [] -> {false, []};
-    V -> {true, V}
-  end,
+  {Exists, Versions} = elsa_service_controller:all(ServiceName),
   {Exists, Req, {ServiceName, Versions}}.
 
 json_response(Req, {ServiceName, Versions}) ->
-  Response = elsa_service_controller:version_format(ServiceName, Versions),
+  Response = elsa_service_controller:format(ServiceName, Versions),
   {elsa_body:to_json(Response), Req, ServiceName}.

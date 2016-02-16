@@ -2,20 +2,27 @@
 -module(elsa_service_controller).
 
 -export([all/0
-       , versions/1
+       , all/1
+       , all/2
        , register/2
        , register_body/1
        , register_body/2
        , register_body/3
        , format/1
-       , version_format/2]).
+       , format/2]).
 
 -define(TABLE, elsa_services).
 
 all() -> elsa_store:get(?TABLE).
 
-versions(ServiceName) ->
-  [S || S <- elsa_store:get(?TABLE), elsa_service:has_name(S, ServiceName)].
+all(Name) ->
+  exists([S || S <- elsa_store:get(?TABLE), elsa_service:match(S, Name)]).
+
+all(Name, Version) ->
+  exists([S || S <- elsa_store:get(?TABLE), elsa_service:match(S, Name, Version)]).
+
+exists([]) -> {false, []};
+exists(Items) -> {true, Items}.
 
 register(Name, Version) ->
   ServiceID = elsa_hash:sha(Name, Version),
@@ -46,7 +53,7 @@ format(Services) ->
    {<<"services">>, [elsa_service:format(S) || S <- Services]}
   ].
 
-version_format(ServiceName, Versions) ->
+format(ServiceName, Versions) ->
   [
    {<<"name">>, ServiceName}
  , {<<"versions">>, [elsa_service:version_format(V) || V <- Versions]}
