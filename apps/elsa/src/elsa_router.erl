@@ -28,6 +28,9 @@ v1_routes() ->
   ]) ++ version("v1", [
     {"/service/:service_name/:service_version/instance", v1_elsa_instances_handler, []},
     {"/service/:service_name/:service_version/instance/:instance_id", v1_elsa_instance_handler, []}
+  ]) ++ version("v1", [
+    {"/service/:service_name/:service_version/instance/:instance_id/thread", v1_elsa_threads_handler, []},
+    {"/service/:service_name/:service_version/instance/:instance_id/thread/:thread_id", v1_elsa_thread_handler, []}
   ]).
 
 kernel_route() ->

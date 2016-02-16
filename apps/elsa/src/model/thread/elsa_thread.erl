@@ -4,7 +4,9 @@
 -export([new/2
        , activate/1
        , deactivate/1
-       , ref/1]).
+       , ref/1
+       , match/2
+       , format/1]).
 
 -include("elsa_thread.hrl").
 
@@ -27,4 +29,13 @@ deactivate(T = #thread{date=Date}) ->
          , task_id = none
           }.
 
-ref(#thread{id = ID}) -> ID.
+ref(#thread{id=ID}) -> ID.
+
+match(#thread{id=ID}, ThreadID) -> ID == ThreadID.
+
+format(#thread{id=ID, task_id=TaskID, date=Date}) ->
+  [
+   {<<"id">>, ID},
+   {<<"task_id">>, TaskID},
+   {<<"date">>, elsa_date:format(Date)}
+  ].

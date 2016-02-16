@@ -6,6 +6,7 @@
          id/1,
          match/2,
          rank/2,
+         threads/1,
          thread_count/1,
          get_thread/1,
          put_thread/2]).
@@ -43,6 +44,8 @@ match(#instance{id=ID}, InstanceID) -> ID == InstanceID.
 
 rank(I1, I2) ->
   threads_out(I1) > threads_out(I2).
+
+threads(#instance{threads=Threads}) -> Threads.
 
 thread_count(#instance{thread_refs=ThreadRefs}) ->
   length(ThreadRefs).
