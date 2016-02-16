@@ -7,6 +7,7 @@
 
 -define(TABLE, elsa_services).
 
+register(N, V, _L, _T) when is_atom(N); is_atom(V) -> missing;
 register(Name, Version, Location, ThreadCount) ->
   ServiceID = elsa_hash:sha(Name, Version),
   case elsa_store:get(?TABLE, ServiceID) of
@@ -30,9 +31,10 @@ unregister(Name, Version, Location) ->
 register_instance(N, V, I) ->
   Fields = {elsa_body:key(<<"location">>, I, missing), elsa_body:key(<<"threads">>, I, 32)},
   {Location, ThreadCount} = Fields,
+  lager:info("Location is: ~p, TC is: ~p, I: ~p", [Location, ThreadCount, I]),
   register(N, V, Location, ThreadCount),
   elsa_body:validate(Fields, [
    {<<"id">>, elsa_hash:sha(Location)},
    {<<"location">>, Location},
-   {<<"capacity">>, ThreadCount}
+   {<<"threads">>, ThreadCount}
   ]).

@@ -32,10 +32,11 @@ register_body(N, V, B) ->
           , elsa_body:key(<<"instances">>, B, missing)
            },
   {Name, Version, Instances} =  Fields,
+  lager:info("Instances: ~p, ~p, ~p", [Instances, Name, Version]),
   elsa_body:validate(Fields, [
     {<<"name">>, Name}
   , {<<"version">>, Version}
-  , {<<"instances">>, [ignore(elsa_instance_controller:register_instance(N, V, I)) || I <- Instances]}
+  , {<<"instances">>, [ignore(elsa_instance_controller:register_instance(Name, Version, I)) || I <- Instances]}
   ]).
 
 ignore({_Status, Response}) -> Response.

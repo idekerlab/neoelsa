@@ -30,6 +30,5 @@ validate(Tuple, Response) ->
 key(Key, Props, Default) ->
   case proplists:get_value(Key, Props, Default) of
     missing -> missing;
-    Value when Default =/= missing, Value =/= Default -> mismatch;
     Value -> Value
   end.
