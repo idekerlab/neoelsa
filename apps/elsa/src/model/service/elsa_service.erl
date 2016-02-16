@@ -11,7 +11,7 @@
        , thread_count/1
        , get_thread/1
        , put_thread/3
-       , service_format/1
+       , format/1
        , version_format/1]).
 
 -include("elsa_service.hrl").
@@ -69,7 +69,7 @@ put_thread(S = #service{instances=Is, date=Date}, InstanceRef, ThreadRef) ->
           , date      = elsa_date:update(Date)
            }.
 
-service_format(S = #service{id=ID, name=Name, version=Version, date=Date, instances=Instances}) ->
+format(S = #service{id=ID, name=Name, version=Version, date=Date, instances=Instances}) ->
   [
    {<<"id">>, ID}
  , {<<"name">>, Name}
