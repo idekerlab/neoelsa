@@ -11,8 +11,8 @@ init({tcp, http}, Req, _Opts) ->
   lager:info("Service request received: ~w", [Req]),
   {Request, Kernel} = elsa_kernel_controller:parse(Req),
   case elsa_kernel_controller:resource_exists(Kernel) of
-    true -> {ok, Request, Kernel};
-    false -> {shutdown, Request, no_state}
+    {true, Service} -> {ok, Request, Kernel};
+    {false, Service} -> {shutdown, Request, no_state}
   end.
 
 handle(Req, Kernel) ->
@@ -22,7 +22,7 @@ handle(Req, Kernel) ->
     R -> R
   after elsa_kernel_controller:timeout(Kernel) ->
     Conn ! timeout,
-    elsa_service_controller:format(Task)
+    elsa_task_controller:format(Task)
   end,
   {ok, Response, done}.
 
