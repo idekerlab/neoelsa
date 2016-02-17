@@ -18,10 +18,10 @@ exists([]) -> {false, []};
 exists(Items) -> {true, Items}.
 
 format(Thread) ->
-  elsa_instance:format(Thread).
+  elsa_thread:format(Thread).
 
-format_threads(Instance) ->
-  [ elsa_thread:format(T) || T <- elsa_instance:threads(Instance) ].
+format_threads(Threads) ->
+  [ elsa_thread:format(T) || T <- Threads ].
 
 
 

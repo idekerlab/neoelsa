@@ -15,7 +15,8 @@ rest_init(Req, _Opts) ->
   {ServiceName, Request} = cowboy_req:binding(service_name, Req),
   {ServiceVersion, Request2} = cowboy_req:binding(service_version, Request),
   {InstanceID, Request3} = cowboy_req:binding(instance_id, Request2),
-  {ok, Request3, {ServiceName, ServiceVersion, InstanceID}}.
+  {ThreadID, Request4} = cowboy_req:binding(thread_id, Request3),
+  {ok, Request4, {ServiceName, ServiceVersion, InstanceID, ThreadID}}.
 
 allowed_methods(Req, Instance) ->
   {[<<"GET">>], Req, Instance}.
@@ -24,7 +25,7 @@ content_types_provided(Req, Instance) ->
   {[{<<"application/json">>, json_response}], Req, Instance}.
 
 resource_exists(Req, {Name, Version, InstanceID, ThreadID}) ->
-  {Exists, Instance} = case elsa_service_controller:all(Name, Version) of
+  {Exists, Thread} = case elsa_service_controller:all(Name, Version) of
     {true, [Service]} ->
       case elsa_instance_controller:get(Service, InstanceID) of
         {true, [I]} -> elsa_thread_controller:get(I, ThreadID);
@@ -32,8 +33,8 @@ resource_exists(Req, {Name, Version, InstanceID, ThreadID}) ->
       end;
     {false, _} -> {false, []}
   end,
-  {Exists, Req, Instance}.
+  {Exists, Req, Thread}.
 
-json_response(Req, [Instance]) ->
-  Response = elsa_instance_controller:format(Instance),
-  {elsa_body:to_json(Response), Req, Instance}.
+json_response(Req, [Thread]) ->
+  Response = elsa_thread_controller:format(Thread),
+  {elsa_body:to_json(Response), Req, Thread}.
