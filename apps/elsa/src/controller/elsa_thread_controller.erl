@@ -15,9 +15,11 @@ all(Instance) ->
 
 get(Name, Version) ->
   lager:info("Getting thread"),
-  {_, Thread} = elsa_store:extract(?TABLE, elsa_hash:sha(Name, Version), fun(S) ->
+  case  elsa_store:extract(?TABLE, elsa_hash:sha(Name, Version), fun(S) ->
     elsa_service:get_thread(S)
-  end), Thread.
+  end) of
+    T  -> info:lager("Stupid: ~p", [T])
+  end.
 
 put(Name, Version, Thread) ->
   elsa_store:set(?TABLE, elsa_hash:sha(Name, Version), fun(S) ->

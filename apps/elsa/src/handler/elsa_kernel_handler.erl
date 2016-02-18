@@ -12,7 +12,9 @@ init({tcp, http}, Req, _Opts) ->
   lager:info("Created kernel: ~p", [Kernel]),
   case elsa_kernel_controller:resource_exists(Kernel) of
     true -> {ok, Request, Kernel};
-    false -> {shutdown, Request, no_state}
+    false ->
+      {ok, Req2} = elsa_kernel_controller:resource_missing(Kernel, Request),
+      {shutdown, Req2,  no_state}
   end.
 
 handle(Req, Kernel) ->

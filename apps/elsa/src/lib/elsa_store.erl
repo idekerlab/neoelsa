@@ -43,11 +43,9 @@ extract(Table, ItemID, ExtractFromItem) ->
     case mnesia:read(Table, ItemID, read) of
       [] -> not_found;
       [Item] ->
-        {Item2, Value} = ExtractFromItem(Item),
-        mnesia:write(Table, Item2, write),
-        {Item2, Value}
+        ExtractFromItem(Item)
     end
-  end), ItemValueOrNotFound .
+  end), ItemValueOrNotFound.
 
 get(Table, ItemID) ->
   {atomic, ItemOrNotFound} = mnesia:transaction(fun() ->

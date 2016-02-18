@@ -2,6 +2,7 @@
 -module(elsa_task).
 
 -export([new/1
+       , id/1
        , set_resource/3
        , update_status/2
        , add_result/4
@@ -15,6 +16,8 @@ new(ServiceID) ->
       , thread_info = new_thread_info(ServiceID, no_resource, no_resource)
       , date   = elsa_date:new()
   }.
+
+id(#task{id = ID}) -> ID.
 
 set_resource(T = #task{thread_info=TI}, InstanceID, ThreadID) ->
   T#task{thread_info = TI#thread_info{instance_id = InstanceID

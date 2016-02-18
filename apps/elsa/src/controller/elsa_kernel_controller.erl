@@ -4,6 +4,7 @@
 -export([parse/1
        , new_task/1
        , resource_exists/1
+       , resource_missing/2
        , timeout/1
        , connect/3]).
 
@@ -35,18 +36,24 @@ create_task(#kernel{name=N, version=V}) ->
   elsa_task_controller:new(elsa_hash:sha(N, V)).
 
 connect(Handler, K = #kernel{name=N, version=V, method=M, endpoint=E, headers=H, body=B}, Task) ->
-  {L, Thread} = elsa_thread_controller:get(N, V),
-  elsa_task_controller:set_resource(Task, elsa_hash:sha(L), elsa_thread:ref(Thread)),
+  {L, Thread} = find_thread(N, V),
+  elsa_task_controller:set_resource(Task, elsa_hash:sha(L), Thread),
   elsa_task_controller:update_status(Task, connected),
   case elsa_http_client:call(M, url(L, E), H, B) of
     {ok, Status, Headers, Body} ->
       elsa_thread_controller:put(N, V, Thread),
+      lager:error("connect"),
       respond(Status, Headers, Body, Task);
     retry ->
       lager:error("Could not connect"),
-      elsa_thread_controller:disable(Thread),
       elsa_task_controller:update_status(Task, retying_with_new_connection),
       connect(Handler, K, Task)
+  end.
+
+find_thread(N, V) ->
+  case elsa_thread_controller:get(N, V) of
+    none_available -> find_thread(N, V);
+    Thread -> Thread
   end.
 
 respond(S, H, B, Task) ->
@@ -55,3 +62,10 @@ respond(S, H, B, Task) ->
   ok.
 
 url(L, E) -> iolist_to_binary([L, E]).
+
+resource_missing(#kernel{name=N, version=V}, Request) ->
+  Req = elsa_body:write(Request, [
+   {<<"status">>, 404},
+   {<<"service_name">>, N},
+   {<<"service_version">>, V}
+  ]), cowboy_req:reply(404, Req).
