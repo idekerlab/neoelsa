@@ -23,7 +23,9 @@ database_setup(Nodes) ->
   mnesia:start(),
   rpc:multicall(Nodes, application, start, [mnesia]),
   lager:info("Mnesia started."),
-  elsa_store:load_table(elsa_services, service, [id, name, version, date, use_count, instances]).
+  elsa_store:load_table(elsa_services, service, [id, name, version, date, use_count, instances]),
+  elsa_store:load_table(elsa_tasks, task, [id, thread_info, complete, status, date, result]),
+  elsa_store:load_table(elsa_results, result, [status, headers, body]).
 
 database_teardown(Nodes) ->
   elsa_store:clear_table(elsa_services),

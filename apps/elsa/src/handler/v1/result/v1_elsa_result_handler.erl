@@ -1,6 +1,6 @@
 
 
--module(v1_elsa_service_handler).
+-module(v1_elsa_result_handler).
 
 -export([init/3,
          rest_init/2,

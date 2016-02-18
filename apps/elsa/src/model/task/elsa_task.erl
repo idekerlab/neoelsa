@@ -1,19 +1,26 @@
 
 -module(elsa_task).
 
--export([new/3
+-export([new/1
+       , set_resource/3
        , update_status/2
        , add_result/4
        , format/1]).
 
 -include("elsa_task.hrl").
 
-new(ServiceID, InstanceID, ThreadID) ->
-  ID = elsa_has:sha(ThreadID, elsa_date:format(elsa_date:utc()))
+new(ServiceID) ->
+  ID = elsa_hash:sha(ServiceID, elsa_date:format(elsa_date:utc())),
   #task{id = ID
-      , thread = new_thread_info(ServiceID, InstanceID, ThreadID)
+      , thread_info = new_thread_info(ServiceID, no_resource, no_resource)
       , date   = elsa_date:new()
   }.
+
+set_resource(T = #task{thread_info=TI}, InstanceID, ThreadID) ->
+  T#task{thread_info = TI#thread_info{instance_id = InstanceID
+                                   , thread_id   = ThreadID
+                                    }
+        }.
 
 new_thread_info(ServiceID, InstanceID, ThreadID) ->
   #thread_info{service_id  = ServiceID
@@ -45,17 +52,17 @@ format(#task{id=ID, thread_info=TI, complete=C, status=S, date=D, result=R}) ->
  , {<<"complete">>, C}
  , {<<"status">>, S}
  , {<<"date">>, elsa_date:format(D)}
-  ] ++ case complete of
+  ] ++ case C of
          false -> [];
          true -> format(R)
-       end.
+       end;
 
 format(#thread_info{service_id=SID, instance_id=IID, thread_id=TID}) ->
   [
    {<<"service_id">>, SID}
  , {<<"instance_Id">>, IID}
  , {<<"thread_id">>, TID}
-  ].
+  ];
 
 format(#result{location=L, completed_on=CO, status=S, body_byte_size=BBS}) ->
   [

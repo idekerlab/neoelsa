@@ -28,7 +28,7 @@ resource_exists(Req, {Name, Version, InstanceID, ThreadID}) ->
   {Exists, Thread} = case elsa_service_controller:all(Name, Version) of
     {true, [Service]} ->
       case elsa_instance_controller:get(Service, InstanceID) of
-        {true, [I]} -> elsa_thread_controller:get(I, ThreadID);
+        {true, [I]} -> elsa_thread_controller:find(I, ThreadID);
         {false, _} -> {false, []}
       end;
     {false, _} -> {false, []}

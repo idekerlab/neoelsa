@@ -3,6 +3,8 @@
 
 -export([all/1
        , get/2
+       , put/3
+       , disable/3
        , format/1
        , format_threads/1]).
 
@@ -11,7 +13,21 @@
 all(Instance) ->
   elsa_instance:threads(Instance).
 
-get(Instance, ThreadID) ->
+get(Name, Version) ->
+  lager:info("Getting thread"),
+  {_, Thread} = elsa_store:extract(?TABLE, elsa_hash:sha(Name, Version), fun(S) ->
+    elsa_service:get_thread(S)
+  end), Thread.
+
+put(Name, Version, Thread) ->
+  elsa_store:set(?TABLE, elsa_hash:sha(Name, Version), fun(S) ->
+    elsa_service:put_thread(S, Thread)
+  end).
+
+disable(Name, Version, Thread) ->
+  ok.
+
+find(Instance, ThreadID) ->
   exists([ T || T <- elsa_instance:threads(Instance), elsa_thread:match(T, ThreadID) ]).
 
 exists([]) -> {false, []};

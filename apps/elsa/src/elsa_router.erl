@@ -34,7 +34,7 @@ v1_routes() ->
   ]).
 
 kernel_route() ->
-  [{"/:service/:version/[...]", elsa_kernel, []}].
+  [{"/:service_name/:service_version/[...]", elsa_kernel_handler, []}].
 
 version(Version, Routes) when is_list(Routes) ->
   [version(Version, Route) || Route <- Routes];

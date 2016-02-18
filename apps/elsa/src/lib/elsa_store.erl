@@ -4,6 +4,7 @@
        , clear_table/1
        , put/2
        , set/3
+       , extract/3
        , get/2
        , get/1]).
 
@@ -36,6 +37,17 @@ set(Table, ItemID, UpdateItem) ->
       [Item] -> mnesia:write(Table, UpdateItem(Item), write)
     end
   end), ItemOrNotFound.
+
+extract(Table, ItemID, ExtractFromItem) ->
+  {atomic, ItemValueOrNotFound} = mnesia:transaction(fun() ->
+    case mnesia:read(Table, ItemID, read) of
+      [] -> not_found;
+      [Item] ->
+        {Item2, Value} = ExtractFromItem(Item),
+        mnesia:write(Table, Item2, write),
+        {Item2, Value}
+    end
+  end), ItemValueOrNotFound .
 
 get(Table, ItemID) ->
   {atomic, ItemOrNotFound} = mnesia:transaction(fun() ->

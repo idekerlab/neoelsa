@@ -7,7 +7,8 @@
          match/2,
          rank/2,
          threads/1,
-         thread_count/1,
+         available_thread_count/1,
+         total_thread_count/1,
          get_thread/1,
          put_thread/2]).
 
@@ -47,11 +48,14 @@ rank(I1, I2) ->
 
 threads(#instance{threads=Threads}) -> Threads.
 
-thread_count(#instance{thread_refs=ThreadRefs}) ->
+available_thread_count(#instance{thread_refs=ThreadRefs}) ->
   length(ThreadRefs).
 
-threads_out(I = #instance{threads=Threads}) ->
-  length(Threads) - thread_count(I).
+total_thread_count(#instance{threads=Threads}) ->
+  length(Threads).
+
+threads_out(I = #instance{threads=Threads, thread_refs=ThreadRefs}) ->
+  length(Threads) - length(ThreadRefs).
 
 get_thread(I = #instance{id=ID, thread_refs=ThreadRefs, threads=Threads, date=Date, use_count=UC}) ->
   case ThreadRefs of
