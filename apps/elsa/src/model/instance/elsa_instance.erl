@@ -57,7 +57,7 @@ total_thread_count(#instance{threads=Threads}) ->
 threads_out(I = #instance{threads=Threads, thread_refs=ThreadRefs}) ->
   length(Threads) - length(ThreadRefs).
 
-get_thread(I = #instance{id=ID, thread_refs=ThreadRefs, threads=Threads, date=Date, use_count=UC}) ->
+get_thread(I = #instance{id=ID, location=Loc, thread_refs=ThreadRefs, threads=Threads, date=Date, use_count=UC}) ->
   case ThreadRefs of
     [] -> none_available;
     [Ref|Refs] -> {I#instance{thread_refs = Refs
@@ -65,7 +65,7 @@ get_thread(I = #instance{id=ID, thread_refs=ThreadRefs, threads=Threads, date=Da
                             , date        = elsa_date:update(Date)
                             , use_count   = UC+1
                              }
-                 , {ID, Ref}
+                 , {Loc, ID, Ref}
                   }
   end.
 

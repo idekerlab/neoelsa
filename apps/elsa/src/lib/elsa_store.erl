@@ -43,7 +43,13 @@ extract(Table, ItemID, ExtractFromItem) ->
     case mnesia:read(Table, ItemID, read) of
       [] -> not_found;
       [Item] ->
-        ExtractFromItem(Item)
+        case ExtractFromItem(Item) of
+          {_, none_available} ->
+            {Item, none_available};
+          {Item2, Value} ->
+            mnesia:write(Table, Item2, write),
+            {Item2, Value}
+        end
     end
   end), ItemValueOrNotFound.
 

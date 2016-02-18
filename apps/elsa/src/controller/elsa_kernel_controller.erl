@@ -26,7 +26,7 @@ new_task(#kernel{name=N, version=V}) ->
 resource_exists(#kernel{name=N, version=V}) ->
   case elsa_service_controller:all(N, V) of
     {false, _} -> false;
-    {true, [Service]} -> elsa_service:available_thread_count(Service) > 0
+    {true, [Service]} -> elsa_service:instance_count(Service) > 0
   end.
 
 timeout(#kernel{timeout=T}) when is_integer(T) -> T;
@@ -36,17 +36,17 @@ create_task(#kernel{name=N, version=V}) ->
   elsa_task_controller:new(elsa_hash:sha(N, V)).
 
 connect(Handler, K = #kernel{name=N, version=V, method=M, endpoint=E, headers=H, body=B}, Task) ->
-  {L, Thread} = find_thread(N, V),
-  elsa_task_controller:set_resource(Task, elsa_hash:sha(L), Thread),
+  {Loc, InstanceID, ThreadID} = find_thread(N, V),
+  elsa_task_controller:set_resource(Task, InstanceID, ThreadID),
   elsa_task_controller:update_status(Task, connected),
-  case elsa_http_client:call(M, url(L, E), H, B) of
+  case elsa_http_client:call(M, url(Loc, E), H, B) of
     {ok, Status, Headers, Body} ->
-      elsa_thread_controller:put(N, V, Thread),
+      elsa_thread_controller:put(N, V, InstanceID, ThreadID),
       lager:error("connect"),
       respond(Status, Headers, Body, Task);
     retry ->
       lager:error("Could not connect"),
-      elsa_task_controller:update_status(Task, retying_with_new_connection),
+      elsa_task_controller:update_status(Task, retrying_with_new_connection),
       connect(Handler, K, Task)
   end.
 

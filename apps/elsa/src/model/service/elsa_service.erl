@@ -10,6 +10,7 @@
        , find_instance/2
        , add_instance/3
        , remove_instance/2
+       , instance_count/1
        , total_thread_count/1
        , available_thread_count/1
        , get_thread/1
@@ -56,6 +57,9 @@ remove_instance(S = #service{instances=Is, date=Date}, InstanceID) ->
           , date      = elsa_date:update(Date)
            }.
 
+instance_count(#service{instances=Is}) ->
+  length(Is).
+
 total_thread_count(#service{instances=Is}) ->
   lists:foldl(fun(I, Sum) -> elsa_instance:total_thread_count(I) + Sum end, 0, Is).
 
@@ -64,19 +68,19 @@ available_thread_count(#service{instances=Is}) ->
 
 get_thread(S = #service{instances=Is, date=Date, use_count=UC}) ->
   Instances = [ I || I <- Is, elsa_instance:available_thread_count(I) > 0 ],
-  [Primary|Rest] = lists:sort(fun elsa_instance:rank/2, Instances),
-  case elsa_instance:get_thread(Primary) of
-    none_available -> none_available;
-    {Primary2, Refs}  ->
-    {S#service{instances = [Primary2|Rest]
-             , date      = elsa_date:update(Date)
-             , use_count = UC+1
-              }, Refs}
+  case lists:sort(fun elsa_instance:rank/2, Instances) of
+    [] -> {S, none_available};
+    [Primary|Rest] ->
+      {Primary2, Refs} = elsa_instance:get_thread(Primary),
+      {S#service{instances = [Primary2|Rest]
+               , date      = elsa_date:update(Date)
+               , use_count = UC+1
+                }, Refs}
   end.
 
 put_thread(S = #service{instances=Is, date=Date}, InstanceRef, ThreadRef) ->
   % Get the instance
-  I = lists:keysearch(InstanceRef, 2, Is),
+  {value, I} = lists:keysearch(InstanceRef, 2, Is),
   Is2 = lists:keyreplace(InstanceRef, 2, Is, elsa_instance:put_thread(I, ThreadRef)),
   S#service{instances = Is2
           , date      = elsa_date:update(Date)
