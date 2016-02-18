@@ -18,15 +18,15 @@ init({tcp, http}, Req, _Opts) ->
   end.
 
 handle(Req, Kernel) ->
-  lager:info("Made it to handle with kernel: ~p", [Kernel]),
+  Timeout = elsa_kernel_controller:timeout(Kernel),
   {Conn, Task}  = create_connection(Kernel),
-  Response = receive
+  Result = receive
     R -> R
-  after elsa_kernel_controller:timeout(Kernel) ->
-    lager:info("TImeout"),
+  after Timeout ->
     Conn ! timeout,
-    elsa_task_controller:format(Task)
+    elsa_task_controller:format(Timeout, Task)
   end,
+  Response = elsa_kernel_controller:create_response(Result, Req),
   {ok, Response, done}.
 
 create_connection(Kernel) ->
@@ -35,3 +35,4 @@ create_connection(Kernel) ->
 
 terminate(_Reason, Req, State) ->
   ok.
+

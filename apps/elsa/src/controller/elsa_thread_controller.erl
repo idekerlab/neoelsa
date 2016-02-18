@@ -14,7 +14,6 @@ all(Instance) ->
   elsa_instance:threads(Instance).
 
 get(Name, Version) ->
-  lager:info("Getting thread"),
   case  elsa_store:extract(?TABLE, elsa_hash:sha(Name, Version), fun(S) ->
     elsa_service:get_thread(S)
   end) of
