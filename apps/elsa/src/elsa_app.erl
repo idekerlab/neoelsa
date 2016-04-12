@@ -6,7 +6,9 @@
         ,stop/1]).
 
 start(_StartType, _StartArgs) ->
+    lager:info("Setting up database"),
     database_setup([node()]),
+    lager:info("Starting router"),
     elsa_router:start(),
     {ok, self()}.
 
@@ -16,7 +18,7 @@ stop(_State) ->
 
 database_setup(Nodes) ->
   mnesia:stop(),
-  case mnesia:create_schema([node()]) of
+  case mnesia:create_schema(Nodes) of
     ok -> lager:info("Schema created.");
     {error, Reason} -> lager:error("Error while creating schema: ~w", [Reason])
   end,
