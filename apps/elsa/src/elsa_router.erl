@@ -5,6 +5,7 @@
          ]).
 
 start() ->
+    elsa_kernel_handler_v2:start(),
     {ok, _} = cowboy:start_http(elsa_server, 100, [{port, 80}],
         [{env, [{dispatch, dispatch('_')}]}]
     ).

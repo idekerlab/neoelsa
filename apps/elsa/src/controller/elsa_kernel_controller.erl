@@ -45,7 +45,7 @@ connect(Handler, K = #kernel{name=N, version=V, method=M, endpoint=E, headers=H,
   case elsa_http_client:call(M, url(Loc, E), H, B) of
     {ok, Status, Headers, Body} ->
       elsa_thread_controller:put(N, V, InstanceID, ThreadID),
-      lager:error("connect"),
+      lager:info("Connection succeeded"),
       respond(Status, Headers, Body, Task, Handler);
     retry ->
       lager:error("Could not connect"),
@@ -67,7 +67,7 @@ find_thread(N, V) ->
   end.
 
 respond(S, H, B, Task, Handler) ->
-  lager:info("response ~p, ~p, ~p", [S, H, B]),
+  lager:info("Response: ~p, ~p, ~p", [S, H, B]),
   receive
     timeout ->
       Task
